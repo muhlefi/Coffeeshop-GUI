@@ -216,8 +216,8 @@ public class SalesTransactionPanel extends JPanel {
                 recentTableModel.addRow(new Object[] {
                     sale.getId(),
                     sale.getTransactionDate().format(dateFormatter),
-                    sale.getUserId(),
-                    sale.getCustomerId() == null ? "-" : sale.getCustomerId(),
+                    sale.getUserName() != null ? sale.getUserName() : String.valueOf(sale.getUserId()),
+                    sale.getCustomerName() != null ? sale.getCustomerName() : "-",
                     sale.getTotal()
                 });
             }

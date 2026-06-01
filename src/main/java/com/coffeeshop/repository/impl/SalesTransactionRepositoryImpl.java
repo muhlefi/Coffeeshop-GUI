@@ -84,7 +84,7 @@ public class SalesTransactionRepositoryImpl implements SalesTransactionRepositor
 
     @Override
     public List<Sale> findRecent(int limit) throws SQLException {
-        String sql = "SELECT id_sale, tanggal, id_user, id_customer, subtotal, diskon, pajak, total FROM sales ORDER BY id_sale DESC LIMIT ?";
+        String sql = "SELECT s.id_sale, s.tanggal, s.id_user, s.id_customer, s.subtotal, s.diskon, s.pajak, s.total, u.nama AS user_name, c.nama AS customer_name FROM sales s LEFT JOIN users u ON s.id_user = u.id_user LEFT JOIN customers c ON s.id_customer = c.id_customer ORDER BY s.id_sale DESC LIMIT ?";
         List<Sale> sales = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -95,8 +95,12 @@ public class SalesTransactionRepositoryImpl implements SalesTransactionRepositor
                     sale.setId(rs.getInt("id_sale"));
                     sale.setTransactionDate(rs.getTimestamp("tanggal").toLocalDateTime());
                     sale.setUserId(rs.getInt("id_user"));
+                    sale.setUserName(rs.getString("user_name"));
                     int customerId = rs.getInt("id_customer");
-                    sale.setCustomerId(rs.wasNull() ? null : customerId);
+                    boolean hasCustomer = !rs.wasNull();
+                    sale.setCustomerId(hasCustomer ? customerId : null);
+                    String customerName = rs.getString("customer_name");
+                    sale.setCustomerName(rs.wasNull() ? null : customerName);
                     sale.setSubtotal(rs.getDouble("subtotal"));
                     sale.setDiscount(rs.getDouble("diskon"));
                     sale.setTax(rs.getDouble("pajak"));

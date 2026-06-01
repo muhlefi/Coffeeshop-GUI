@@ -78,7 +78,7 @@ public class PurchaseTransactionRepositoryImpl implements PurchaseTransactionRep
 
     @Override
     public List<Purchase> findRecent(int limit) throws SQLException {
-        String sql = "SELECT id_purchase, tanggal, id_user, id_supplier, total FROM purchases ORDER BY id_purchase DESC LIMIT ?";
+        String sql = "SELECT p.id_purchase, p.tanggal, p.id_user, p.id_supplier, p.total, u.nama AS user_name, s.nama_supplier AS supplier_name FROM purchases p LEFT JOIN users u ON p.id_user = u.id_user LEFT JOIN suppliers s ON p.id_supplier = s.id_supplier ORDER BY p.id_purchase DESC LIMIT ?";
         List<Purchase> purchases = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -89,7 +89,9 @@ public class PurchaseTransactionRepositoryImpl implements PurchaseTransactionRep
                     purchase.setId(rs.getInt("id_purchase"));
                     purchase.setTransactionDate(rs.getTimestamp("tanggal").toLocalDateTime());
                     purchase.setUserId(rs.getInt("id_user"));
+                    purchase.setUserName(rs.getString("user_name"));
                     purchase.setSupplierId(rs.getInt("id_supplier"));
+                    purchase.setSupplierName(rs.getString("supplier_name"));
                     purchase.setTotal(rs.getDouble("total"));
                     purchases.add(purchase);
                 }

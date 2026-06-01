@@ -25,6 +25,11 @@ public class LookupService {
         return executeLookup(sql, "id_supplier", "nama_supplier");
     }
 
+    public List<LookupItem> getCategories() throws SQLException {
+        String sql = "SELECT id_category, nama_category FROM categories ORDER BY nama_category";
+        return executeLookup(sql, "id_category", "nama_category");
+    }
+
     public List<LookupItem> getProducts() throws SQLException {
         String sql = "SELECT id_product, nama_produk FROM products WHERE status = TRUE ORDER BY nama_produk";
         return executeLookup(sql, "id_product", "nama_produk");

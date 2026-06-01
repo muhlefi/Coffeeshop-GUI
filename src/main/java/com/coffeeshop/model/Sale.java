@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 public class Sale extends BaseEntity {
     private LocalDateTime transactionDate;
     private int userId;
+    private String userName;
     private Integer customerId;
+    private String customerName;
     private double subtotal;
     private double discount;
     private double tax;
@@ -27,12 +29,28 @@ public class Sale extends BaseEntity {
         this.userId = userId;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public Integer getCustomerId() {
         return customerId;
     }
 
     public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     public double getSubtotal() {

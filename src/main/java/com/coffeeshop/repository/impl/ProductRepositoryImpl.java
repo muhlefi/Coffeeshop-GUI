@@ -13,7 +13,7 @@ import java.util.List;
 public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> findAll() throws SQLException {
-        String sql = "SELECT id_product, id_category, nama_produk, harga, stok, status FROM products ORDER BY id_product";
+        String sql = "SELECT p.id_product, p.id_category, p.nama_produk, p.harga, p.stok, p.status, c.nama_category FROM products p LEFT JOIN categories c ON p.id_category = c.id_category ORDER BY p.id_product";
         List<Product> products = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -28,7 +28,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public List<Product> searchByName(String keyword) throws SQLException {
-        String sql = "SELECT id_product, id_category, nama_produk, harga, stok, status FROM products WHERE nama_produk LIKE ? ORDER BY id_product";
+        String sql = "SELECT p.id_product, p.id_category, p.nama_produk, p.harga, p.stok, p.status, c.nama_category FROM products p LEFT JOIN categories c ON p.id_category = c.id_category WHERE p.nama_produk LIKE ? ORDER BY p.id_product";
         List<Product> products = new ArrayList<>();
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -45,7 +45,7 @@ public class ProductRepositoryImpl implements ProductRepository {
 
     @Override
     public Product findById(int id) throws SQLException {
-        String sql = "SELECT id_product, id_category, nama_produk, harga, stok, status FROM products WHERE id_product = ?";
+        String sql = "SELECT p.id_product, p.id_category, p.nama_produk, p.harga, p.stok, p.status, c.nama_category FROM products p LEFT JOIN categories c ON p.id_category = c.id_category WHERE p.id_product = ?";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -102,6 +102,7 @@ public class ProductRepositoryImpl implements ProductRepository {
         Product product = new Product();
         product.setId(rs.getInt("id_product"));
         product.setCategoryId(rs.getInt("id_category"));
+        product.setCategoryName(rs.getString("nama_category"));
         product.setName(rs.getString("nama_produk"));
         product.setPrice(rs.getDouble("harga"));
         product.setStock(rs.getInt("stok"));

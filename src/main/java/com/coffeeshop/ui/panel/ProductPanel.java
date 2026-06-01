@@ -2,7 +2,9 @@ package com.coffeeshop.ui.panel;
 
 import com.coffeeshop.exception.DataTidakValidException;
 import com.coffeeshop.exception.InputKosongException;
+import com.coffeeshop.model.LookupItem;
 import com.coffeeshop.model.Product;
+import com.coffeeshop.service.LookupService;
 import com.coffeeshop.service.ProductService;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -10,6 +12,7 @@ import java.awt.GridLayout;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -22,10 +25,11 @@ import javax.swing.table.DefaultTableModel;
 
 public class ProductPanel extends JPanel {
     private final ProductService productService = new ProductService();
+    private final LookupService lookupService = new LookupService();
 
     private final JTextField txtSearch = new JTextField(20);
     private final JTextField txtId = new JTextField(6);
-    private final JTextField txtCategoryId = new JTextField(6);
+    private final JComboBox<LookupItem> cmbCategory = new JComboBox<>();
     private final JTextField txtName = new JTextField(20);
     private final JTextField txtPrice = new JTextField(12);
     private final JTextField txtStock = new JTextField(8);
@@ -48,7 +52,19 @@ public class ProductPanel extends JPanel {
         initTopPanel();
         initFormPanel();
         initTable();
+        loadCategories();
         loadData();
+    }
+
+    private void loadCategories() {
+        try {
+            cmbCategory.removeAllItems();
+            for (LookupItem item : lookupService.getCategories()) {
+                cmbCategory.addItem(item);
+            }
+        } catch (SQLException e) {
+            showError("Gagal memuat data kategori: " + e.getMessage());
+        }
     }
 
     private void initTopPanel() {
@@ -73,8 +89,8 @@ public class ProductPanel extends JPanel {
         JPanel formPanel = new JPanel(new GridLayout(7, 2, 8, 8));
         formPanel.add(new JLabel("ID Produk"));
         formPanel.add(txtId);
-        formPanel.add(new JLabel("ID Kategori"));
-        formPanel.add(txtCategoryId);
+        formPanel.add(new JLabel("Kategori"));
+        formPanel.add(cmbCategory);
         formPanel.add(new JLabel("Nama Produk"));
         formPanel.add(txtName);
         formPanel.add(new JLabel("Harga"));
@@ -111,7 +127,13 @@ public class ProductPanel extends JPanel {
             if (!e.getValueIsAdjusting() && table.getSelectedRow() >= 0) {
                 int row = table.getSelectedRow();
                 txtId.setText(String.valueOf(tableModel.getValueAt(row, 0)));
-                txtCategoryId.setText(String.valueOf(tableModel.getValueAt(row, 1)));
+                String categoryName = String.valueOf(tableModel.getValueAt(row, 1));
+                for (int i = 0; i < cmbCategory.getItemCount(); i++) {
+                    if (cmbCategory.getItemAt(i).toString().equals(categoryName)) {
+                        cmbCategory.setSelectedIndex(i);
+                        break;
+                    }
+                }
                 txtName.setText(String.valueOf(tableModel.getValueAt(row, 2)));
                 txtPrice.setText(String.valueOf(tableModel.getValueAt(row, 3)));
                 txtStock.setText(String.valueOf(tableModel.getValueAt(row, 4)));
@@ -193,7 +215,8 @@ public class ProductPanel extends JPanel {
         if (includeId) {
             product.setId(Integer.parseInt(txtId.getText()));
         }
-        product.setCategoryId(Integer.parseInt(txtCategoryId.getText()));
+        LookupItem selectedCategory = (LookupItem) cmbCategory.getSelectedItem();
+        product.setCategoryId(selectedCategory != null ? selectedCategory.getId() : 0);
         product.setName(txtName.getText());
         product.setPrice(Double.parseDouble(txtPrice.getText()));
         product.setStock(Integer.parseInt(txtStock.getText()));
@@ -206,7 +229,7 @@ public class ProductPanel extends JPanel {
         for (Product p : products) {
             tableModel.addRow(new Object[] {
                 p.getId(),
-                p.getCategoryId(),
+                p.getCategoryName() != null ? p.getCategoryName() : String.valueOf(p.getCategoryId()),
                 p.getName(),
                 p.getPrice(),
                 p.getStock(),
@@ -217,7 +240,9 @@ public class ProductPanel extends JPanel {
 
     private void clearForm() {
         txtId.setText("");
-        txtCategoryId.setText("");
+        if (cmbCategory.getItemCount() > 0) {
+            cmbCategory.setSelectedIndex(0);
+        }
         txtName.setText("");
         txtPrice.setText("");
         txtStock.setText("");

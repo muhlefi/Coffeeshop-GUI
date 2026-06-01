@@ -208,8 +208,8 @@ public class PurchaseTransactionPanel extends JPanel {
                 recentTableModel.addRow(new Object[] {
                     purchase.getId(),
                     purchase.getTransactionDate().format(dateFormatter),
-                    purchase.getUserId(),
-                    purchase.getSupplierId(),
+                    purchase.getUserName() != null ? purchase.getUserName() : String.valueOf(purchase.getUserId()),
+                    purchase.getSupplierName() != null ? purchase.getSupplierName() : String.valueOf(purchase.getSupplierId()),
                     purchase.getTotal()
                 });
             }
