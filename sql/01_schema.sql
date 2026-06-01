@@ -1,0 +1,105 @@
+CREATE DATABASE IF NOT EXISTS coffeeshop_gui;
+USE coffeeshop_gui;
+
+CREATE TABLE IF NOT EXISTS users (
+    id_user INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('ADMIN', 'KASIR', 'GUDANG', 'MANAGER') NOT NULL,
+    status BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS customers (
+    id_customer INT AUTO_INCREMENT PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    no_hp VARCHAR(20) NOT NULL,
+    email VARCHAR(100),
+    alamat VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS suppliers (
+    id_supplier INT AUTO_INCREMENT PRIMARY KEY,
+    nama_supplier VARCHAR(100) NOT NULL,
+    no_hp VARCHAR(20) NOT NULL,
+    alamat VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+    id_category INT AUTO_INCREMENT PRIMARY KEY,
+    nama_category VARCHAR(100) NOT NULL UNIQUE,
+    deskripsi VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    id_product INT AUTO_INCREMENT PRIMARY KEY,
+    id_category INT NOT NULL,
+    nama_produk VARCHAR(120) NOT NULL,
+    harga DECIMAL(12,2) NOT NULL,
+    stok INT NOT NULL DEFAULT 0,
+    status BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_products_category FOREIGN KEY (id_category) REFERENCES categories(id_category)
+);
+
+CREATE TABLE IF NOT EXISTS sales (
+    id_sale INT AUTO_INCREMENT PRIMARY KEY,
+    tanggal DATETIME NOT NULL,
+    id_user INT NOT NULL,
+    id_customer INT NULL,
+    subtotal DECIMAL(12,2) NOT NULL,
+    diskon DECIMAL(12,2) NOT NULL DEFAULT 0,
+    pajak DECIMAL(12,2) NOT NULL DEFAULT 0,
+    total DECIMAL(12,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sales_user FOREIGN KEY (id_user) REFERENCES users(id_user),
+    CONSTRAINT fk_sales_customer FOREIGN KEY (id_customer) REFERENCES customers(id_customer)
+);
+
+CREATE TABLE IF NOT EXISTS sales_detail (
+    id_sale_detail INT AUTO_INCREMENT PRIMARY KEY,
+    id_sale INT NOT NULL,
+    id_product INT NOT NULL,
+    qty INT NOT NULL,
+    harga DECIMAL(12,2) NOT NULL,
+    subtotal_item DECIMAL(12,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sales_detail_sale FOREIGN KEY (id_sale) REFERENCES sales(id_sale),
+    CONSTRAINT fk_sales_detail_product FOREIGN KEY (id_product) REFERENCES products(id_product)
+);
+
+CREATE TABLE IF NOT EXISTS purchases (
+    id_purchase INT AUTO_INCREMENT PRIMARY KEY,
+    tanggal DATETIME NOT NULL,
+    id_user INT NOT NULL,
+    id_supplier INT NOT NULL,
+    total DECIMAL(12,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_purchases_user FOREIGN KEY (id_user) REFERENCES users(id_user),
+    CONSTRAINT fk_purchases_supplier FOREIGN KEY (id_supplier) REFERENCES suppliers(id_supplier)
+);
+
+CREATE TABLE IF NOT EXISTS purchase_detail (
+    id_purchase_detail INT AUTO_INCREMENT PRIMARY KEY,
+    id_purchase INT NOT NULL,
+    id_product INT NOT NULL,
+    qty INT NOT NULL,
+    harga_beli DECIMAL(12,2) NOT NULL,
+    subtotal_item DECIMAL(12,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_purchase_detail_purchase FOREIGN KEY (id_purchase) REFERENCES purchases(id_purchase),
+    CONSTRAINT fk_purchase_detail_product FOREIGN KEY (id_product) REFERENCES products(id_product)
+);
